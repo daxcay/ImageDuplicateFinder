@@ -262,7 +262,7 @@ def open_folder():
     return jsonify({'status': "success"})
 
 def start_flask():
-    app.run(debug=True, port=5501)
+    app.run(debug=False, port=5501)
 
 if __name__ == '__main__':
     webbrowser.open('http://127.0.0.1:5501')
