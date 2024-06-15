@@ -1,4 +1,3 @@
-import threading
 import json
 import shutil
 import urllib.parse
@@ -6,12 +5,11 @@ import time
 import random
 import string
 import os
-import webview
 from glob import glob
 from PIL import Image
 import numpy as np
 from threading import Thread
-import multiprocessing
+import webbrowser
 from tensorflow.keras.applications.resnet50 import ResNet50, preprocess_input
 from tensorflow.keras.preprocessing.image import img_to_array
 from tensorflow.keras.models import Model
@@ -24,7 +22,6 @@ base_model = ResNet50(weights='imagenet')
 model = Model(inputs=base_model.input,outputs=base_model.get_layer('avg_pool').output)
 images_folder_progress = 0
 dupprogress = 0
-processess = []
 
 def copy_files(src_dir, dest_dir):
     for item in os.listdir(src_dir):
@@ -158,21 +155,7 @@ def prepare_files(images_folder, work_folder, backup_folder):
 def generate_random_string(length=10):
     return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
 
-def open_folder(folder_path):
-    try:
-        if os.name == 'nt':
-            os.startfile(folder_path)  # Opens folder in Windows
-        elif os.name == 'posix':
-            os.system(f'xdg-open "{folder_path}"')  # Opens folder in Linux
-        elif os.name == 'darwin':
-            os.system(f'open "{folder_path}"')  # Opens folder in macOS
-        return jsonify({'status': 'success', 'message': 'Folder opened successfully.'})
-    except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)})
-
 # assets directory setup
-
-
 @app.route('/assets/<path:filename>')
 def assets(filename):
     return send_from_directory('assets', filename)
@@ -204,7 +187,6 @@ def page_reset():
     return render_template('reset.html')
 
 # api routes
-
 
 @app.route('/images_folder', methods=['POST'])
 def api_submit_image_folder():
@@ -277,26 +259,11 @@ def delete_duplicates():
 
 @app.route('/open_folder', methods=['POST'])
 def open_folder():
-    images_folder = request.form['images_folder']
-    open_folder(images_folder)
     return jsonify({'status': "success"})
 
 def start_flask():
-    app.run(debug=False, port=5501)
-
-def on_closed():
-    global app_window
-    app_window.destroy()
-    global processess
-    for process in processess:
-        process.terminate()
+    app.run(debug=True, port=5501)
 
 if __name__ == '__main__':
-    
-    process = multiprocessing.Process(target=start_flask)
-    process.start()
-    processess.append(process)
-
-    app_window = webview.create_window("Image Duplicate Finder", "http://localhost:5501", width=1280, height=720, resizable=True, confirm_close=True)
-    app_window.events.closed += on_closed
-    webview.start(debug=False)
+    webbrowser.open('http://127.0.0.1:5501')
+    start_flask()

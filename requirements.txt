@@ -3,4 +3,3 @@ numpy
 Pillow
 scikit-learn
 tensorflow
-pywebview
