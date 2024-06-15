@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="assets/js/jquery.min.js"></script>
+    <link rel="stylesheet" href="assets/css/result.css">
+</head>
+
+<body>
+    <form id="deleteForm" action="/delete_duplicates" method="post" enctype="multipart/form-data">
+        <h3>Please select the duplicate images you want to delete:</h3>
+        <p>By default, all the <b>duplicate</b> images are selected for deletion:</p>
+        <div class="block">
+            <input type="hidden" id="images_folder" name="images_folder" value="{{ images_folder }}">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Original Image</th>
+                        <th>Duplicate Images</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for original_image, duplicate_images in image_data.items() %}
+                    <tr>
+                        <td><img src="{{ url_for('serve_image', filename=original_image, images_work_folder=images_work_folder) }}"
+                                alt="Original" style="width: 100px;height: auto;"></td>
+                        <td>
+                            <ul>
+                                {% for duplicate_image in duplicate_images %}
+                                <li>
+                                    <input type="checkbox" name="duplicate_images[]" value="{{ duplicate_image }}"
+                                        checked>
+                                    <img src="{{ url_for('serve_image', filename=duplicate_image, images_work_folder=images_work_folder) }}"
+                                        alt="Duplicate" style="width: 100px;height: auto;">
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <button id="submit_delete" type="button" onclick="deleteDuplicates()">Delete Selected</button>
+    </form>
+
+    <script>
+        function deleteDuplicates() {
+            
+            var formData = new FormData(document.getElementById('deleteForm'));
+
+            $('#submit_delete').css('display','none')
+
+            fetch('/delete_duplicates', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        window.location.href = "/reset"
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    $('#submit_delete').css('display','block')
+                });
+        }
+    </script>
+</body>
+
+</html>

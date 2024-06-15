@@ -1,0 +1,28 @@
+.navbar {
+    left: 0;
+    top: 0;
+    position: absolute;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    padding: 0 30px;
+    background-color: cornflowerblue;
+}
+
+.navbar p {
+    color: white;
+    font-weight: 600;
+}
+
+.navbar a {
+    color: white;
+    font-weight: 600;
+}
+
+.footer {
+    right: 30px;
+    bottom: 30px;
+    position: absolute;
+}
