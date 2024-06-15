@@ -5,9 +5,8 @@
     width: 100%;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    height: 60px;
-    padding: 0 30px;
+    justify-content: center;
+    padding: 30px;
     background-color: #333333;
 }
 
@@ -22,7 +21,13 @@
 }
 
 .footer {
-    right: 30px;
-    bottom: 30px;
+    display: flex;
+    align-items: center;
+    left: 0;
+    bottom: 0;
     position: absolute;
+    gap: 30px;
+    width: 100%;
+    padding: 30px;
+    justify-content: center;
 }
