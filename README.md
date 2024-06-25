@@ -67,10 +67,9 @@ http://127.0.0.1:5501
 - Finally, open the image directory. Images are now duplicate free.
 - A backup folder is created with all the original files (with duplicates) in case anything goes wrong. 
 
+## About Me
 
-## CREDITS
-
-◉ Daxton Caylor - ComfyUI Node Developer 
+Daxton Caylor - Python Developer 
 - Discord - daxtoncaylor
 - Email - daxtoncaylor@gmail.com
 - Discord server: https://discord.gg/Z44Zjpurjp
