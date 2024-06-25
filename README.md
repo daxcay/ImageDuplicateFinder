@@ -3,7 +3,7 @@
 
 ImageDuplicateFinder is a Python and Flask based webapp designed to efficiently identify duplicate images within a dataset. This project utilizes advanced image processing and machine learning techniques to compare and detect duplicates.
 
-Youtube video tutorial: https://www.youtube.com/watch?v=u90vtRh4Fr8
+Youtube video tutorial: [https://www.youtube.com/watch?v=u90vtRh4Fr8](https://youtu.be/-v9X4CBX81A)
 
 ## Features
 
