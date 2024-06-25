@@ -10,6 +10,15 @@ ImageDuplicateFinder is a Python and Flask based webapp designed to efficiently 
 - **Extensible**: Easy to integrate with other applications using Flask.
 - **Visualization**: Provides visual confirmation of detected duplicates.
 
+## Requirements
+- Python (😅)
+- virtualenv
+
+Make sure **venv** is installed
+
+```
+pip install virtualenv
+```
 
 ## Run Locally
 
@@ -17,12 +26,6 @@ Clone the project
 
 ```bash
   git clone https://github.com/daxcay/ImageDuplicateFinder
-```
-
-Make sure **venv** is installed
-
-```
-pip install virtualenv
 ```
 
 ## Go to the project directory.
