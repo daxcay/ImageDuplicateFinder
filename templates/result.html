@@ -24,16 +24,25 @@
                 <tbody>
                     {% for original_image, duplicate_images in image_data.items() %}
                     <tr>
-                        <td><img src="{{ url_for('serve_image', filename=original_image, images_work_folder=images_work_folder) }}"
-                                alt="Original" style="width: 100px;height: auto;"></td>
-                        <td>
+                        <td class="original_images">
                             <ul>
+                                <li>
+                                    <input type="checkbox" name="duplicate_images[]" value="{{ original_image }}">
+                                    <img src="{{ url_for('serve_image', filename=original_image, images_work_folder=images_work_folder) }}"
+                                        alt="Original" style="width: 100px;height: auto;">     
+                                    <span class="resolution" data-image="{{ original_image }}"></span>   
+                                </li>
+                            </ul>
+                        </td>
+                        <td>
+                            <ul class="duplicate_images">
                                 {% for duplicate_image in duplicate_images %}
                                 <li>
                                     <input type="checkbox" name="duplicate_images[]" value="{{ duplicate_image }}"
                                         checked>
                                     <img src="{{ url_for('serve_image', filename=duplicate_image, images_work_folder=images_work_folder) }}"
                                         alt="Duplicate" style="width: 100px;height: auto;">
+                                    <span class="resolution" data-image="{{ duplicate_image }}"></span>
                                 </li>
                                 {% endfor %}
                             </ul>
@@ -44,14 +53,14 @@
             </table>
         </div>
         <button id="submit_delete" type="button" onclick="deleteDuplicates()">Delete Selected</button>
+        <p id="submit_delete_message" type="button"></p>
     </form>
 
     <script>
         function deleteDuplicates() {
-            
             var formData = new FormData(document.getElementById('deleteForm'));
-
-            $('#submit_delete').css('display','none')
+            $('#submit_delete').css('display', 'none');
+            $('#submit_delete_message').text("Please Wait...");
 
             fetch('/delete_duplicates', {
                 method: 'POST',
@@ -60,14 +69,49 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === "success") {
-                        window.location.href = "/reset"
+                        $('#submit_delete_message').text("Duplicate images deleted");
+                        setTimeout(() => {
+                            window.location.href = "/reset";
+                        }, 2000)
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    $('#submit_delete').css('display','block')
+                    $('#submit_delete').css('display', 'block');
                 });
         }
+
+        function calculateImageDimensions() {
+            var images = document.querySelectorAll('.duplicate_images img');
+            images.forEach(function (img) {
+                if (img.complete) {
+                    displayImageDimensions(img);
+                } else {
+                    img.onload = function () {
+                        displayImageDimensions(img);
+                    };
+                }
+            });
+            images = document.querySelectorAll('.original_images img');
+            images.forEach(function (img) {
+                if (img.complete) {
+                    displayImageDimensions(img);
+                } else {
+                    img.onload = function () {
+                        displayImageDimensions(img);
+                    };
+                }
+            });
+        }
+
+        function displayImageDimensions(img) {
+            var resolutionSpan = img.parentNode.querySelector('.resolution');
+            if (resolutionSpan && img.naturalWidth && img.naturalHeight) {
+                resolutionSpan.innerText = '(' + img.naturalWidth + 'x' + img.naturalHeight + ')';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', calculateImageDimensions);
     </script>
 </body>
 

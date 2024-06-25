@@ -48,6 +48,7 @@ td {
     border: 1px solid rgb(204, 204, 204, 0.2);
     text-align: left;
     padding: 8px;
+    position: relative;
 }
 
 th {
@@ -98,4 +99,12 @@ input[type="checkbox"] {
     position: absolute;
     top: 0;
     right: 0;
+}
+
+.resolution {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    font-size: 14px;
+    background-color: #1e1e1e;
 }
