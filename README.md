@@ -68,7 +68,7 @@ http://127.0.0.1:5501
 - A backup folder is created with all the original files (with duplicates) in case anything goes wrong. 
 
 
-# CREDITS
+## CREDITS
 
 ◉ Daxton Caylor - ComfyUI Node Developer 
 - Discord - daxtoncaylor
@@ -76,6 +76,6 @@ http://127.0.0.1:5501
 - Discord server: https://discord.gg/Z44Zjpurjp
 - Commission Status:  🟢 **Open** 🟢
 
-# Support ❤️
+## Support ❤️
 - Buy me a coffee: https://buymeacoffee.com/daxtoncaylor
 - If you like to suppport me you can donate me on paypal: https://paypal.me/daxtoncaylor
