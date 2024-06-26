@@ -5,6 +5,8 @@ ImageDuplicateFinder is a Python and Flask based webapp designed to efficiently 
 
 Youtube video tutorial: [https://www.youtube.com/watch?v=u90vtRh4Fr8](https://youtu.be/-v9X4CBX81A)
 
+### Updates: [updates.md](https://github.com/daxcay/ImageDuplicateFinder/blob/ed77b1cfcba897abfca3627bc856385a24518f1b/updates.md)
+
 ## Features
 
 - **Robust Duplicate Detection**: Leverages deep learning models to find exact and near-duplicate images.
