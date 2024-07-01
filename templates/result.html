@@ -28,9 +28,9 @@
                             <ul>
                                 <li>
                                     <input type="checkbox" name="duplicate_images[]" value="{{ original_image }}">
-                                    <img src="{{ url_for('serve_image', filename=original_image, images_work_folder=images_work_folder) }}"
-                                        alt="Original" style="width: 100px;height: auto;">     
-                                    <span class="resolution" data-image="{{ original_image }}"></span>   
+                                    <img src="{{ url_for('serve_image', filename=original_image, images_folder=images_folder) }}"
+                                        alt="Original" style="width: 100px;height: auto;">
+                                    <span class="resolution" data-image="{{ original_image }}"></span>
                                 </li>
                             </ul>
                         </td>
@@ -40,7 +40,7 @@
                                 <li>
                                     <input type="checkbox" name="duplicate_images[]" value="{{ duplicate_image }}"
                                         checked>
-                                    <img src="{{ url_for('serve_image', filename=duplicate_image, images_work_folder=images_work_folder) }}"
+                                    <img src="{{ url_for('serve_image', filename=duplicate_image, images_folder=images_folder) }}"
                                         alt="Duplicate" style="width: 100px;height: auto;">
                                     <span class="resolution" data-image="{{ duplicate_image }}"></span>
                                 </li>
@@ -55,7 +55,9 @@
         <button id="submit_delete" type="button" onclick="deleteDuplicates()">Delete Selected</button>
         <p id="submit_delete_message" type="button"></p>
     </form>
+    <div class="errors">
 
+    </div>
     <script>
         function deleteDuplicates() {
             var formData = new FormData(document.getElementById('deleteForm'));
@@ -111,7 +113,27 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', calculateImageDimensions);
+        function init() {
+            calculateImageDimensions()
+            
+            fetch('/find_duplicates_errors')
+                .then(response => response.json())
+                .then(data => {
+                    let text = ""
+                    if(data.errors && data.errors.length > 0) {
+                        for (let index = 0; index < data.errors.length; index++) {
+                            let error = data.errors[index]
+                            text+=`<p>Image read error: <b>${error}</b> </p>`
+                        }                        
+                        $('.errors').append(text)
+                    }
+                })
+                .catch(error => {
+                    console.log(error)
+                });
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 

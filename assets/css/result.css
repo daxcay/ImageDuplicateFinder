@@ -13,14 +13,18 @@ h3 {
 
 body {
     background-color: #1e1e1e;
-    display: flex;
+    display: block;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     height: 100vh;
     width: 100%;
+    gap: 20px;
 }
 
-form {
+form, .errors {
+    margin: 20px auto;
+    display: block;
     background-color: #333333;
     width: 80%;
     padding: 40px 60px;

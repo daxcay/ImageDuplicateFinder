@@ -23,6 +23,8 @@ base_model = ResNet50(weights='imagenet')
 model = Model(inputs=base_model.input, outputs=base_model.get_layer('avg_pool').output)
 images_folder_progress = 0
 dupprogress = 0
+dupprogresstext = "0/0"
+errors = []
 
 def copy_files(src_dir, dest_dir, delete_source=False):
     for item in os.listdir(src_dir):
@@ -78,6 +80,8 @@ def dhash(image, hash_size=8):
 def extract_features(image_path):
     try:
         img = Image.open(image_path).resize((224, 224))
+        if img.mode == 'RGBA':
+            img = img.convert('RGB')
         img_array = img_to_array(img)
         img_array = np.expand_dims(img_array, axis=0)
         img_array = preprocess_input(img_array)
@@ -89,14 +93,17 @@ def extract_features(image_path):
         return None, None
 
 def find_duplicates(folder_path):
-
     global dupprogress
+    global dupprogresstext
+    global errors
 
     if not os.path.exists(folder_path):
         print(f"The provided folder path {folder_path} does not exist.")
         return
 
-    images = glob(os.path.join(folder_path, '*'))
+    image_extensions = ['.jpg', '.jpeg', '.png']
+    images = [img_path for img_path in glob(os.path.join(folder_path, '*')) if os.path.splitext(img_path)[1].lower() in image_extensions]
+    
     print(f'Found {len(images)} files in {folder_path}.')
 
     lock = threading.Lock()
@@ -104,33 +111,42 @@ def find_duplicates(folder_path):
     duplicates_dict = {}
 
     for idx, img_path in enumerate(images):
-        features, img_hash = extract_features(img_path)
-        if features is None:
-            continue
-        
-        with lock:
-            is_duplicate = False
-            for original_img_path, (f, h) in features_list.items():
-                esimilarity = euclidean_distances([features], [f])[0][0]
-                csimilarity = cosine_similarity([features], [f])[0][0]
-                if esimilarity < 0.5 or csimilarity > 0.90 or img_hash == h:
-                    is_duplicate = True
-                    duplicates_dict.setdefault(os.path.basename(original_img_path), []).append(os.path.basename(img_path))
-                    break
+        try:
+            features, img_hash = extract_features(img_path)
+            if features is None:
+                dupprogress = (idx + 1) * 100 // len(images)
+                dupprogresstext = f'{(idx + 1)}/{len(images)}'
+                continue
 
-            if not is_duplicate:
-                features_list[img_path] = (features, img_hash)
-        
-        dupprogress = (idx + 1) * 100 // len(images)
+            with lock:
+                is_duplicate = False
+                for original_img_path, (f, h) in features_list.items():
+                    esimilarity = euclidean_distances([features], [f])[0][0]
+                    csimilarity = cosine_similarity([features], [f])[0][0]
+                    if esimilarity < 0.5 or csimilarity > 0.90 or img_hash == h:
+                        is_duplicate = True
+                        duplicates_dict.setdefault(os.path.basename(original_img_path), []).append(os.path.basename(img_path))
+                        break
+
+                if not is_duplicate:
+                    features_list[img_path] = (features, img_hash)
+
+            dupprogress = (idx + 1) * 100 // len(images)
+            dupprogresstext = f'{(idx + 1)}/{len(images)}'
+
+        except Exception as e:
+            print(f"Error processing image {img_path}")
+            errors.append(img_path)
+            dupprogress = (idx + 1) * 100 // len(images)
+            dupprogresstext = f'{(idx + 1)}/{len(images)}'
 
     print(f'Finished processing {folder_path}.')
     os.makedirs(os.path.dirname(os.path.join(folder_path, 'duplicates.json')), exist_ok=True)
     with open(os.path.join(folder_path, 'duplicates.json'), 'w') as json_file:
         json.dump(duplicates_dict, json_file, indent=4)
 
-
-def load_image_data(work_folder):
-    data_path = os.path.join(work_folder, 'duplicates.json')
+def load_image_data(folder_path):
+    data_path = os.path.join(folder_path, 'duplicates.json')
     if not os.path.exists(data_path):
         return {}
     with open(data_path, 'r') as f:
@@ -146,10 +162,10 @@ def load_image_data(work_folder):
 def generate_random_string(length=10):
     return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
 
-def prepare_files(images_folder, work_folder, backup_folder):
+def prepare_files(images_folder, backup_folder):
     global images_folder_progress
 
-    image_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.webp']
+    image_extensions = ['.jpg', '.jpeg', '.png']
 
     files = [f for f in os.listdir(images_folder) if os.path.isfile(os.path.join(images_folder, f)) and os.path.splitext(f)[1].lower() in image_extensions]
     total_files = len(files)
@@ -159,15 +175,14 @@ def prepare_files(images_folder, work_folder, backup_folder):
         if total_backup_files == 0:
             images_folder_progress = -1
         else:
-            clean_folder(work_folder)
-            copy_files(backup_folder, work_folder)
+            copy_files(backup_folder, images_folder)
             images_folder_progress = 100
     else:    
         for idx, file in enumerate(files):
             source_path = os.path.join(images_folder, file)
             file_name, file_extension = os.path.splitext(file)
             unique_name = f"{time.time_ns()}-{generate_random_string()}{file_extension}"
-            shutil.copy(source_path, os.path.join(work_folder, unique_name))
+            shutil.copy(source_path, os.path.join(images_folder, unique_name))
             shutil.copy(source_path, os.path.join(backup_folder, unique_name))
             os.remove(source_path)
             images_folder_progress = (idx + 1) * 100 // total_files
@@ -185,14 +200,13 @@ def page_main():
 @app.route('/result')
 def page_result():
     images_folder = request.args.get('images_folder')
-    images_work_folder = os.path.join(images_folder, 'work')
-    image_data = load_image_data(images_work_folder)
-    return render_template('result.html', image_data=image_data, images_work_folder=images_work_folder, images_folder=images_folder)
+    image_data = load_image_data(images_folder)
+    return render_template('result.html', image_data=image_data, images_folder=images_folder)
 
 @app.route('/images/<path:filename>')
 def serve_image(filename):
-    images_work_folder = request.args.get('images_work_folder')
-    return send_from_directory(images_work_folder, filename)
+    images_folder = request.args.get('images_folder')
+    return send_from_directory(images_folder, filename)
 
 @app.route('/reset')
 def page_reset():
@@ -211,12 +225,10 @@ def api_submit_image_folder():
     if not os.path.exists(images_folder) or not os.path.isdir(images_folder):
         return jsonify({'status': 'error', 'error': 'Invalid folder path'})
 
-    images_work_folder = os.path.join(images_folder, 'work')
     images_backup_folder = os.path.join(images_folder, 'backup')
 
-    os.makedirs(images_work_folder, exist_ok=True)
     os.makedirs(images_backup_folder, exist_ok=True)
-    prepare_files(images_folder, images_work_folder, images_backup_folder)
+    prepare_files(images_folder, images_backup_folder)
     return jsonify({'status': 'success', 'success': 'Reading folder'})
     
 @app.route('/images_folder')
@@ -227,35 +239,41 @@ def api_images_folder_progress():
 @app.route('/find_duplicates', methods=['POST'])
 def finddup():
     global dupprogress
+    global dupprogresstext
+    global errors
+    errors = []
+    dupprogresstext = "0/0"
     dupprogress = 0
     images_folder = request.form['images_folder']
-    images_work_folder = os.path.join(images_folder, 'work')
-    data_path = os.path.join(images_work_folder, 'duplicates.json')
+    data_path = os.path.join(images_folder, 'duplicates.json')
     if os.path.exists(data_path):
-        dupprogress = 100
-        return jsonify({'status': 'success'})
-    thread = Thread(target=find_duplicates, args=(images_work_folder,))
+        os.remove(data_path)
+    thread = Thread(target=find_duplicates, args=(images_folder,))
     thread.start()
     return jsonify({'status': 'success'})
 
 @app.route('/find_duplicates')
 def get_dup_progress():
     global dupprogress
-    return jsonify({'progress': dupprogress})
+    global dupprogresstext
+    return jsonify({'progress': dupprogress, 'text': dupprogresstext})
+
+@app.route('/find_duplicates_errors')
+def get_dup_progress_errors():
+    global errors
+    return jsonify({'errors': errors})
 
 @app.route('/delete_duplicates', methods=['POST'])
 def delete_duplicates():
     images_folder = request.form['images_folder']
-    images_work_folder = os.path.join(images_folder, 'work')
     duplicate_images = request.form.getlist('duplicate_images[]')
     for image in duplicate_images:
-        image_path = os.path.join(images_work_folder, image)
+        image_path = os.path.join(images_folder, image)
         if os.path.exists(image_path):
             os.remove(image_path)
-    data_path = os.path.join(images_work_folder, 'duplicates.json')
+    data_path = os.path.join(images_folder, 'duplicates.json')
     if os.path.exists(data_path):
         os.remove(data_path)
-    move_files(images_work_folder, images_folder, delete_source=True)
     return jsonify({'status': "success"})
 
 @app.route('/open_folder', methods=['POST'])

@@ -2,6 +2,14 @@ $(document).ready(function () {
 
     let progress_bar = null
 
+    $('#images_folder').on('change', function() {
+        var value = $('#images_folder').val();
+        if (value.includes('"')) {
+            value = value.replace(/"/g, '');
+            $('#images_folder').val(value).focus();
+        }
+    });
+
     $("#images_folder_modal").submit(function (e) {
 
         e.preventDefault();
@@ -67,74 +75,10 @@ $(document).ready(function () {
                     window.location.href = "/result?images_folder=" + images_folder
                 }
                 progress_bar.setProgress(data.progress)
-                progress_bar.setText("Finding duplicates(" + data.progress + "%)")
+                progress_bar.setText("Finding duplicates(" + data.text + ")")
             })
         }, 1000)
     }
 
 
 });
-
-function setProgress(text, value) {
-    $('#progress').css('width', value + "%");
-    $('#progress-text').text(text);
-}
-
-function setdProgress(text, value) {
-    $('#dprogress').css('width', value + "%");
-    $('#dprogress-text').text(text);
-}
-
-function checkProgress() {
-    $('#tskButton').prop('disabled', true)
-    setProgress("Preparing files...", 1)
-    var interval = setInterval(function () {
-        $.get('/progress', function (data) {
-            if (data.progress !== undefined) {
-                if (data.progress == 100) {
-                    clearInterval(interval);
-                    $('#tskButton').prop('disabled', false)
-                    setProgress("Preparation done.", data.progress)
-                    $('#dupForm').css('display', 'flex')
-                }
-            } else {
-                setProgress("Error Occured", 0)
-                $('#tskButton').prop('disabled', false)
-                clearInterval(interval);
-            }
-        });
-    }, 1000);
-}
-
-function checkDupProgress() {
-    $('#dupButton').prop('disabled', true)
-    setdProgress("Finding duplicates...", 1)
-    var interval = setInterval(function () {
-        $.get('/dupprogress', function (data) {
-            if (data.progress !== undefined) {
-                setdProgress("Finding duplicates...", data.progress)
-                if (data.progress == 100) {
-                    clearInterval(interval);
-                    $('#dupButton').prop('disabled', false)
-                    setdProgress("Finding duplicates done.", data.progress)
-                    $('#resForm').css('display', 'flex')
-                }
-            } else {
-                setdProgress("Error Occured", 0)
-                $('#dupButton').prop('disabled', false)
-                clearInterval(interval);
-            }
-        });
-    }, 1000);
-}
-
-function handlePaste(event) {
-    var clipboardData, pastedText;
-    clipboardData = event.clipboardData || window.clipboardData;
-    pastedText = clipboardData.getData('Text');
-    pastedText = pastedText.replace(/["']/g, '');
-    localStorage.setItem('source_dir', pastedText)
-    setTimeout(() => {
-        $('#folderPath').val(pastedText);
-    }, 100);
-}
