@@ -149,7 +149,9 @@ def generate_random_string(length=10):
 def prepare_files(images_folder, work_folder, backup_folder):
     global images_folder_progress
 
-    files = [f for f in os.listdir(images_folder) if os.path.isfile(os.path.join(images_folder, f))]
+    image_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.webp']
+
+    files = [f for f in os.listdir(images_folder) if os.path.isfile(os.path.join(images_folder, f)) and os.path.splitext(f)[1].lower() in image_extensions]
     total_files = len(files)
 
     if total_files == 0: 
@@ -214,7 +216,7 @@ def api_submit_image_folder():
 
     os.makedirs(images_work_folder, exist_ok=True)
     os.makedirs(images_backup_folder, exist_ok=True)
-    msg = prepare_files(images_folder, images_work_folder, images_backup_folder)
+    prepare_files(images_folder, images_work_folder, images_backup_folder)
     return jsonify({'status': 'success', 'success': 'Reading folder'})
     
 @app.route('/images_folder')
