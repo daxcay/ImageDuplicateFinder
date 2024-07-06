@@ -1,7 +1,7 @@
 
 # ImageDuplicateFinder
 
-![image](https://img.shields.io/badge/version-1.1.0-green) ![image](https://img.shields.io/badge/last_update-May_2024-green)
+![image](https://img.shields.io/badge/version-1.1.0-green) ![image](https://img.shields.io/badge/last_update-July_2024-green)
 
 **ImageDuplicateFinder** is a python and flask based webapp designed to efficiently identify duplicate images within a dataset. This project utilizes advanced image processing and machine learning techniques to compare and detect duplicates.
 
