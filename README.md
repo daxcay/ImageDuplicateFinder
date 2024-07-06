@@ -1,87 +1,92 @@
 
 # ImageDuplicateFinder
 
-ImageDuplicateFinder is a Python and Flask based webapp designed to efficiently identify duplicate images within a dataset. This project utilizes advanced image processing and machine learning techniques to compare and detect duplicates.
+![image](https://img.shields.io/badge/version-1.1.0-green) ![image](https://img.shields.io/badge/last_update-May_2024-green)
+
+**ImageDuplicateFinder** is a python and flask based webapp designed to efficiently identify duplicate images within a dataset. This project utilizes advanced image processing and machine learning techniques to compare and detect duplicates.
 
 Youtube video tutorial: [https://www.youtube.com/watch?v=u90vtRh4Fr8](https://youtu.be/-v9X4CBX81A)
 
-### Updates: [updates.md](https://github.com/daxcay/ImageDuplicateFinder/blob/ed77b1cfcba897abfca3627bc856385a24518f1b/updates.md)
-
-## Features
-
-- **Robust Duplicate Detection**: Leverages deep learning models to find exact and near-duplicate images.
-- **Scalable**: Efficiently handles large datasets with minimal performance overhead.
-- **Extensible**: Easy to integrate with other applications using Flask.
-- **Visualization**: Provides visual confirmation of detected duplicates.
-
-## Requirements
-- Python (😅)
-- virtualenv
-
-To install **venv**: 
-
-```
-pip install virtualenv
-```
-
-## Run Locally
-
-Clone the project
-
-```bash
-  git clone https://github.com/daxcay/ImageDuplicateFinder
-```
-
-## Go to the project directory.
-
-- ### Windows
-
-Open run_windows.bat
-
-- ### Linux & MacOS
-
-Open a terminal and give execute permission like this
-
-```
-chmod +x run_linux_mac.sh
-```
-
-Execute the script
-
-```
-./run_linux_mac.sh
-```
-
 ## Installation
 
-When you run the above scripts it creates a virtual environment and installs every requirement automatically.
+  #### Requirements
+  
+  - Latest Python (😅)
+  - Git (https://git-scm.com/downloads)
+  - Virtual environment package `virtualenv`: To install open CMD and write `pip install virtualenv`    
+  - Clone repository into a folder: `git clone https://github.com/daxcay/ImageDuplicateFinder`
 
-If all goes well you will see a browser window gets open to this address: 
+  #### Execution
 
-```
-http://127.0.0.1:5501
-```
-![image](https://github.com/daxcay/ImageDuplicateFinder/assets/164315771/3e8bac40-6779-42ba-a474-3293b6479443)
+  Go to the cloned repository folder: 
+
+  - **For Windows**: open `run_window.bat` and allow app to run. (as its downloaded from internet it will ask for it)
+  - **Linux & MacOS**: open shell/terminal and give execute permission like this: `chmod +x run_linux_mac.sh` and execute it like this: `./run_linux_mac.sh`
+
+  #### Initial run
+  - When running for the first time the program will install Flask, numpy, Pillow, scikit-learn, tensorflow.  
+  - Updates will take place automatically.
+  - If all goes well a brower windows will open with this address `http://127.0.0.1:5501`
+
+  ![image](https://github.com/daxcay/ImageDuplicateFinder/assets/164315771/19919300-bfbb-4d45-8b72-dba08e4a0510)
 
 ## Usage
 
-- **Image Folder Preparation**: Make a folder and place all the image files in top level. make sure no other subfolder is present.
-- **Copy Folder Path**: ok now copy this folder as path.
-- **Paste Folder Path**: paste folder in the input and press submit.
-- After successfull run you will see a page to select image for deletion.
-- By default all the duplicate imges are selected for deletion but check the selected images for any incorrect selection.
-- Press deleted selected to delete all the duplicate files.
-- Finally, open the image directory. Images are now duplicate free.
-- A backup folder is created with all the original files (with duplicates) in case anything goes wrong. 
+  - ### Image path
 
-## About Me
+    Got to your image folder and copy its path and paste it in the input.
+  
+  - ### Setting Euclidean Similarity Threshold (`esimilarity_threshold`)
+  
+    It Measures the Euclidean distance between the feature vectors of two images. A lower Euclidean distance indicates higher similarity between the images.
+      
+    - **Best Setting**: Lower values (e.g., 0.1) are more strict, identifying images as duplicates only if they are very similar. This minimizes false positives but may miss some duplicates.
+    - **Worst Setting**: Higher values (e.g., 1.0) are more lenient, allowing for more variance between images to be considered duplicates. This can increase false positives.
+    
+  - ### Setting Cosine Similarity Threshold (`csimilarity_threshold`)
+  
+    It Measures the cosine similarity between the feature vectors of two images. A higher cosine similarity (closer to 1) indicates higher similarity between the images.
+      
+    - **Best Setting**: Higher values (e.g., 0.95) are more strict, identifying images as duplicates only if they are very similar. This minimizes false positives but may miss some duplicates.
+    - **Worst Setting**: Lower values (e.g., 0.7) are more lenient, allowing for more variance between images to be considered duplicates. This can increase false positives.
 
-Daxton Caylor - Python Developer 
-- Discord - daxtoncaylor
-- Email - daxtoncaylor@gmail.com
-- Discord server: https://discord.gg/Z44Zjpurjp
-- Commission Status:  🟢 **Open** 🟢
+  - ### Default Values
+  
+    - `esimilarity_threshold=0.5`: This is a moderate setting, balancing between false positives and false negatives.
+    - `csimilarity_threshold=0.9`: This is a high setting, ensuring that only very similar images are considered duplicates.
+  
+  - ### Impact of Settings
+  
+    - **Strict Settings (Lower `esimilarity_threshold` and Higher `csimilarity_threshold`)**:
+      - **Pros**: Reduces false positives, ensuring that only very similar images are flagged as duplicates.
+      - **Cons**: May miss some duplicates that have slight variations.
+        
+    - **Lenient Settings (Higher `esimilarity_threshold` and Lower `csimilarity_threshold`)**:
+      - **Pros**: Captures more potential duplicates, including those with slight variations.
+      - **Cons**: Increases the risk of false positives, flagging non-duplicate images as duplicates.
+  
+  - ### Recommendations
+  
+    - **Best Settings for Most Use Cases**: 
+      - `esimilarity_threshold=0.5` (moderate strictness)
+      - `csimilarity_threshold=0.9` (high strictness)
+    
+    - **Adjustments**: 
+      - If you notice too many false positives, lower the `esimilarity_threshold` and/or raise the `csimilarity_threshold`.
+      - If you notice too many false negatives (missed duplicates), raise the `esimilarity_threshold` and/or lower the `csimilarity_threshold`.
 
-## Support ❤️
-- Buy me a coffee: https://buymeacoffee.com/daxtoncaylor
-- If you like to suppport me you can donate me on paypal: https://paypal.me/daxtoncaylor
+After a successful run, you will see a page to select images for deletion. By default, all the duplicate images are selected for deletion, but check the selected images for any incorrect selection. Press "delete selected" to delete all the duplicate files. Finally, open the image directory. Images are now duplicate-free. A backup folder is created with all the original files (with duplicates) in case anything goes wrong.
+
+## Credits
+
+### Daxton Caylor - ComfyUI Node Developer 
+  
+  ### Contact
+   - **Twitter**: @daxcay27
+   - **Email** - daxtoncaylor@gmail.com
+   - **Discord** - daxtoncaylor
+   - **DiscordServer**: https://discord.gg/Z44Zjpurjp
+  
+  ### Support
+   - **Buy me a coffee**: https://buymeacoffee.com/daxtoncaylor
+   - **Support me on paypal**: https://paypal.me/daxtoncaylor
