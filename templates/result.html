@@ -11,7 +11,7 @@
 <body>
     <form id="deleteForm" action="/delete_duplicates" method="post" enctype="multipart/form-data">
         <h3>Please select the duplicate images you want to delete:</h3>
-        <p>By default, all the <b>duplicate</b> images are selected for deletion:</p>
+        <p>Images with <b>checkbox</b> selected will be <b>deleted</b></p>
         <div class="block">
             <input type="hidden" id="images_folder" name="images_folder" value="{{ images_folder }}">
             <table>
