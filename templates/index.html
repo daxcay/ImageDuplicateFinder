@@ -4,12 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Duplicates finder</title>
+    <title>Image Duplicates Finder</title>
     <script src="assets/js/jquery.min.js"></script>
     <link rel="stylesheet" href="assets/css/main.css">
     <link rel="stylesheet" href="assets/css/progress.bar.css">
     <link rel="stylesheet" href="assets/css/index.css">
 </head>
+
 <body>
     <div class="navbar">
         <p>Image Duplicate Finder</p>
@@ -18,7 +19,15 @@
         <form id="images_folder_modal">
             <h3>Please enter the path to the images folder:</h3>
             <input type="text" id="images_folder" placeholder="Images folder path" name="images_folder" required>
+            
+            <label for="esimilarity_threshold">Euclidean Distance Threshold: <span id="esimilarity_value">0.5</span></label>
+            <input type="range" id="esimilarity_threshold" name="esimilarity_threshold" min="0" max="1" step="0.01" value="0.5">
+            
+            <label for="csimilarity_threshold">Cosine Similarity Threshold: <span id="csimilarity_value">0.90</span></label>
+            <input type="range" id="csimilarity_threshold" name="csimilarity_threshold" min="0" max="1" step="0.01" value="0.90">
+
             <button id="images_folder_modal_submit" type="submit">Submit</button>
+            <button id="images_folder_modal_stop" type="button">Stop</button>
         </form>
     </div>
     <div class="footer">
@@ -28,4 +37,5 @@
     <script src="assets/js/progress.bar.js"></script>
     <script src="assets/js/index.js"></script>
 </body>
+
 </html>

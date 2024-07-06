@@ -25,6 +25,7 @@ images_folder_progress = 0
 dupprogress = 0
 dupprogresstext = "0/0"
 errors = []
+stop_thread = False
 
 def copy_files(src_dir, dest_dir, delete_source=False):
     for item in os.listdir(src_dir):
@@ -92,10 +93,13 @@ def extract_features(image_path):
         print(f"Error processing image {image_path}: {e}")
         return None, None
 
-def find_duplicates(folder_path):
+def find_duplicates(folder_path, esimilarity_threshold=0.5, csimilarity_threshold=0.9):
     global dupprogress
     global dupprogresstext
     global errors
+    global stop_thread
+
+    stop_thread = False  # Reset the stop flag at the beginning
 
     if not os.path.exists(folder_path):
         print(f"The provided folder path {folder_path} does not exist.")
@@ -111,6 +115,10 @@ def find_duplicates(folder_path):
     duplicates_dict = {}
 
     for idx, img_path in enumerate(images):
+        if stop_thread:  # Check the stop flag
+            print("Stopping thread as requested.")
+            break
+
         try:
             features, img_hash = extract_features(img_path)
             if features is None:
@@ -123,7 +131,7 @@ def find_duplicates(folder_path):
                 for original_img_path, (f, h) in features_list.items():
                     esimilarity = euclidean_distances([features], [f])[0][0]
                     csimilarity = cosine_similarity([features], [f])[0][0]
-                    if esimilarity < 0.5 or csimilarity > 0.90 or img_hash == h:
+                    if esimilarity < esimilarity_threshold or csimilarity > csimilarity_threshold or img_hash == h:
                         is_duplicate = True
                         duplicates_dict.setdefault(os.path.basename(original_img_path), []).append(os.path.basename(img_path))
                         break
@@ -245,10 +253,12 @@ def finddup():
     dupprogresstext = "0/0"
     dupprogress = 0
     images_folder = request.form['images_folder']
+    esimilarity_threshold = float(request.form.get('esimilarity_threshold', 0.5))
+    csimilarity_threshold = float(request.form.get('csimilarity_threshold', 0.9))
     data_path = os.path.join(images_folder, 'duplicates.json')
     if os.path.exists(data_path):
         os.remove(data_path)
-    thread = Thread(target=find_duplicates, args=(images_folder,))
+    thread = Thread(target=find_duplicates, args=(images_folder, esimilarity_threshold, csimilarity_threshold))
     thread.start()
     return jsonify({'status': 'success'})
 
@@ -275,6 +285,12 @@ def delete_duplicates():
     if os.path.exists(data_path):
         os.remove(data_path)
     return jsonify({'status': "success"})
+
+@app.route('/stop_duplicates', methods=['POST'])
+def stop_duplicates():
+    global stop_thread
+    stop_thread = True
+    return jsonify({'status': 'success', 'message': 'Stopping duplicate finding process'})
 
 @app.route('/open_folder', methods=['POST'])
 def open_folder():

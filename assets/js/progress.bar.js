@@ -5,7 +5,7 @@ class ProgressBar {
         let bar = `<div class="bar"></div>`
         let text = `<p class="text"></p>`
         let block = `<div class="progress-bar" id="${this.id}">${text}${bar}</div>`
-        $(parent).append(block)
+        $(parent).prepend(block)
     }
     setText(text) {
         $("#"+this.id+' .text').text(text)

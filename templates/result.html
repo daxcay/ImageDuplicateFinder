@@ -55,7 +55,7 @@
         <button id="submit_delete" type="button" onclick="deleteDuplicates()">Delete Selected</button>
         <p id="submit_delete_message" type="button"></p>
     </form>
-    <div class="errors">
+    <div class="errors" style="display: none;">
 
     </div>
     <script>
@@ -121,6 +121,7 @@
                 .then(data => {
                     let text = ""
                     if(data.errors && data.errors.length > 0) {
+                        $('.errors').css("display","block")
                         for (let index = 0; index < data.errors.length; index++) {
                             let error = data.errors[index]
                             text+=`<p>Image read error: <b>${error}</b> </p>`

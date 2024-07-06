@@ -9,6 +9,18 @@
 h3 {
     font-weight: 400;
     letter-spacing: normal;
+    font-size: medium;
+}
+
+label {
+    font-weight: 400;
+    letter-spacing: normal;
+    font-size: medium;
+}
+
+label span {
+    font-weight: 600;
+    color: cornflowerblue;
 }
 
 body {
@@ -42,6 +54,12 @@ input {
     border-radius: 8px;
     padding-left: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+input[type="range"] {
+    box-shadow: none;
+    padding: 0;
+    height: auto;
 }
 
 button {
