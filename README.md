@@ -26,7 +26,7 @@ Youtube video tutorial: [https://www.youtube.com/watch?v=u90vtRh4Fr8](https://yo
   #### Initial run
   - When running for the first time the program will install Flask, numpy, Pillow, scikit-learn, tensorflow.  
   - Updates will take place automatically.
-  - If all goes well a brower windows will open with this address `http://127.0.0.1:5501`
+  - If all goes well a browser windows will open with this address `http://127.0.0.1:5501`
 
   ![image](https://github.com/daxcay/ImageDuplicateFinder/assets/164315771/19919300-bfbb-4d45-8b72-dba08e4a0510)
 
