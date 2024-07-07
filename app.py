@@ -188,11 +188,12 @@ def prepare_files(images_folder, backup_folder):
     else:    
         for idx, file in enumerate(files):
             source_path = os.path.join(images_folder, file)
-            file_name, file_extension = os.path.splitext(file)
-            unique_name = f"{time.time_ns()}-{generate_random_string()}{file_extension}"
-            shutil.copy(source_path, os.path.join(images_folder, unique_name))
-            shutil.copy(source_path, os.path.join(backup_folder, unique_name))
-            os.remove(source_path)
+            # file_name, file_extension = os.path.splitext(file)
+            # # unique_name = f"{time.time_ns()}-{generate_random_string()}{file_extension}"
+            # shutil.copy(source_path, os.path.join(images_folder, file_name))
+            # shutil.copy(source_path, os.path.join(backup_folder, file_name))
+            shutil.copy(source_path, backup_folder)
+            # os.remove(source_path)
             images_folder_progress = (idx + 1) * 100 // total_files
 
 # assets directory setup
