@@ -114,11 +114,6 @@
 
         function init() {
             
-            let images_folder = localStorage.getItem('images_folder');
-            if(images_folder) {
-                $('#backup_path').text(images_folder+"\\backup")
-            }
-
             calculateImageDimensions()
             
             fetch('/find_duplicates_errors')
