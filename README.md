@@ -34,7 +34,9 @@ Youtube video tutorial: [https://www.youtube.com/watch?v=u90vtRh4Fr8](https://yo
 
   - ### Image path
 
-    Got to your image folder and copy its path and paste it in the input.
+    Got to your image folder and copy it as a path and paste it in the input box.
+
+    > **Note**: Make sure images names have no spaces.
   
   - ### Setting Euclidean Similarity Threshold (`esimilarity_threshold`)
   
