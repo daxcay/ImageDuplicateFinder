@@ -10,9 +10,7 @@
 
 <body>
     <form id="deleteForm" action="/delete_duplicates" method="post" enctype="multipart/form-data">
-        <h3>Backup saved in: <span id="backup_path"></span></h3>
-        <h4>Please select the duplicate images you want to delete:</h4>
-        <p>Images with <b>checkbox</b> selected will be <b>deleted</b></p>
+        <h4>Select duplicate images for deletion. a backup will be saved</h4>
         <div class="block">
             <input type="hidden" id="images_folder" name="images_folder" value="{{ images_folder }}">
             <table>
