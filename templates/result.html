@@ -10,7 +10,8 @@
 
 <body>
     <form id="deleteForm" action="/delete_duplicates" method="post" enctype="multipart/form-data">
-        <h3>Please select the duplicate images you want to delete:</h3>
+        <h3>Backup saved in: <span id="backup_path"></span></h3>
+        <h4>Please select the duplicate images you want to delete:</h4>
         <p>Images with <b>checkbox</b> selected will be <b>deleted</b></p>
         <div class="block">
             <input type="hidden" id="images_folder" name="images_folder" value="{{ images_folder }}">
@@ -114,6 +115,12 @@
         }
 
         function init() {
+            
+            let images_folder = localStorage.getItem('images_folder');
+            if(images_folder) {
+                $('#backup_path').text(images_folder+"\\backup")
+            }
+
             calculateImageDimensions()
             
             fetch('/find_duplicates_errors')
