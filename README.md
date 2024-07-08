@@ -42,26 +42,27 @@ Youtube video tutorial: [https://www.youtube.com/watch?v=u90vtRh4Fr8](https://yo
   
   - ### Setting Euclidean Similarity Threshold
 
-    - 0 (exactly same): strict
-    - 0.5 (similar enough): moderate
-    - 1.0 (different): lineint
+    A **lower** value indicates higher similarity between the images.
 
-    A lower value indicates higher similarity between the images.
+    - 0 (exactly same)
+    - 0.5 (similar enough)
+    - 1.0 (different)
+
+  > **Note:** if you notice too many false positives (differnt images flagged as duplicates), lower the `Euclidean Similarity Threshold` and/or raise the `Cosine Similarity Threshold`.
     
   - ### Setting Cosine Similarity Threshold
   
-    - 0 (different): lineint
-    - 0.5 (similar enough): moderate
-    - 1 (exactly same): strict
+    A **higher** value indicates higher similarity between the images.
 
-    A higher value indicates higher similarity between the images.
+    - 0 (different)
+    - 0.5 (similar enough)
+    - 1 (exactly same)
 
-#### Best Setting
-  - Euclidean Similarity Threshold = 0.5
-  - Cosine Similarity Threshold = 0.9
+  > **Note:** if you notice too many false negatives (missed duplicates), raise the `Euclidean Similarity Threshold` and/or lower the `Cosine Similarity Threshold`.
 
-> If you notice too many false positives, lower the `Euclidean Similarity Threshold` and/or raise the `Cosine Similarity Threshold`.
-> If you notice too many false negatives (missed duplicates), raise the `Euclidean Similarity Threshold` and/or lower the `Cosine Similarity Threshold`.
+  - ### Best Setting
+    - Euclidean Similarity Threshold = **0.5**
+    - Cosine Similarity Threshold = **0.9**
 
 After a successful run, you will see a page to select images for deletion. By default, all the duplicate images are selected for deletion, but check the selected images for any incorrect selection. Press "delete selected" to delete all the duplicate files. Finally, open the image directory. Images are now duplicate-free. A backup folder is created with all the original files (with duplicates) in case anything goes wrong.
 
