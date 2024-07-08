@@ -1,4 +1,6 @@
 
+![COMFY-UI (2)](https://github.com/daxcay/ImageDuplicateFinder/assets/164315771/6b472fc0-8a2e-419a-a623-d7b94910d895)
+
 # ImageDuplicateFinder
 
 ![image](https://img.shields.io/badge/version-1.1.0-green) ![image](https://img.shields.io/badge/last_update-July_2024-green)
