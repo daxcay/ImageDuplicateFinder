@@ -1,7 +1,7 @@
 
 ![COMFY-UI (4)](https://github.com/daxcay/ImageDuplicateFinder/assets/164315771/39d8151a-b234-4fd5-b65d-2291a96585ff)
 
-# ImageDuplicateFinder
+# Image Duplicate Finder
 
 ![image](https://img.shields.io/badge/version-1.1.0-green) ![image](https://img.shields.io/badge/last_update-July_2024-green)
 
@@ -40,44 +40,28 @@ Youtube video tutorial: [https://www.youtube.com/watch?v=u90vtRh4Fr8](https://yo
 
     > **Note**: Make sure images names have no spaces.
   
-  - ### Setting Euclidean Similarity Threshold (`esimilarity_threshold`)
-  
-    It Measures the Euclidean distance between the feature vectors of two images. A lower Euclidean distance indicates higher similarity between the images.
-      
-    - **Best Setting**: Lower values (e.g., 0.1) are more strict, identifying images as duplicates only if they are very similar. This minimizes false positives but may miss some duplicates.
-    - **Worst Setting**: Higher values (e.g., 1.0) are more lenient, allowing for more variance between images to be considered duplicates. This can increase false positives.
-    
-  - ### Setting Cosine Similarity Threshold (`csimilarity_threshold`)
-  
-    It Measures the cosine similarity between the feature vectors of two images. A higher cosine similarity (closer to 1) indicates higher similarity between the images.
-      
-    - **Best Setting**: Higher values (e.g., 0.95) are more strict, identifying images as duplicates only if they are very similar. This minimizes false positives but may miss some duplicates.
-    - **Worst Setting**: Lower values (e.g., 0.7) are more lenient, allowing for more variance between images to be considered duplicates. This can increase false positives.
+  - ### Setting Euclidean Similarity Threshold
 
-  - ### Default Values
-  
-    - `esimilarity_threshold=0.5`: This is a moderate setting, balancing between false positives and false negatives.
-    - `csimilarity_threshold=0.9`: This is a high setting, ensuring that only very similar images are considered duplicates.
-  
-  - ### Impact of Settings
-  
-    - **Strict Settings (Lower `esimilarity_threshold` and Higher `csimilarity_threshold`)**:
-      - **Pros**: Reduces false positives, ensuring that only very similar images are flagged as duplicates.
-      - **Cons**: May miss some duplicates that have slight variations.
-        
-    - **Lenient Settings (Higher `esimilarity_threshold` and Lower `csimilarity_threshold`)**:
-      - **Pros**: Captures more potential duplicates, including those with slight variations.
-      - **Cons**: Increases the risk of false positives, flagging non-duplicate images as duplicates.
-  
-  - ### Recommendations
-  
-    - **Best Settings for Most Use Cases**: 
-      - `esimilarity_threshold=0.5` (moderate strictness)
-      - `csimilarity_threshold=0.9` (high strictness)
+    - 0 (exactly same): strict
+    - 0.5 (similar enough): moderate
+    - 1.0 (different): lineint
+
+    A lower value indicates higher similarity between the images.
     
-    - **Adjustments**: 
-      - If you notice too many false positives, lower the `esimilarity_threshold` and/or raise the `csimilarity_threshold`.
-      - If you notice too many false negatives (missed duplicates), raise the `esimilarity_threshold` and/or lower the `csimilarity_threshold`.
+  - ### Setting Cosine Similarity Threshold
+  
+    - 0 (different): lineint
+    - 0.5 (similar enough): moderate
+    - 1 (exactly same): strict
+
+    A higher value indicates higher similarity between the images.
+
+#### Best Setting
+  - Euclidean Similarity Threshold = 0.5
+  - Cosine Similarity Threshold = 0.9
+
+> If you notice too many false positives, lower the `Euclidean Similarity Threshold` and/or raise the `Cosine Similarity Threshold`.
+> If you notice too many false negatives (missed duplicates), raise the `Euclidean Similarity Threshold` and/or lower the `Cosine Similarity Threshold`.
 
 After a successful run, you will see a page to select images for deletion. By default, all the duplicate images are selected for deletion, but check the selected images for any incorrect selection. Press "delete selected" to delete all the duplicate files. Finally, open the image directory. Images are now duplicate-free. A backup folder is created with all the original files (with duplicates) in case anything goes wrong.
 
