@@ -34,13 +34,13 @@ Youtube video tutorial: [https://www.youtube.com/watch?v=u90vtRh4Fr8](https://yo
 
 ## Usage
 
-  - ### Image path
+- ### Image path
 
     Got to your image folder and copy it as a path and paste it in the input box.
 
     > **Note**: Make sure images names have no spaces.
   
-  - ### Setting Euclidean Similarity Threshold
+- ### Setting Euclidean Similarity Threshold
 
     A **lower** value indicates higher similarity between the images.
 
@@ -48,9 +48,9 @@ Youtube video tutorial: [https://www.youtube.com/watch?v=u90vtRh4Fr8](https://yo
     - 0.5 (similar enough)
     - 1.0 (different)
 
-  > **Note:** if you notice too many false positives (differnt images flagged as duplicates), lower the `Euclidean Similarity Threshold` and/or raise the `Cosine Similarity Threshold`.
+> **Note:** if you notice too many false positives (different images flagged as duplicates), lower the `Euclidean Similarity Threshold` and/or raise the `Cosine Similarity Threshold`.
     
-  - ### Setting Cosine Similarity Threshold
+- ### Setting Cosine Similarity Threshold
   
     A **higher** value indicates higher similarity between the images.
 
@@ -58,9 +58,9 @@ Youtube video tutorial: [https://www.youtube.com/watch?v=u90vtRh4Fr8](https://yo
     - 0.5 (similar enough)
     - 1 (exactly same)
 
-  > **Note:** if you notice too many false negatives (missed duplicates), raise the `Euclidean Similarity Threshold` and/or lower the `Cosine Similarity Threshold`.
+> **Note:** if you notice too many false negatives (missed duplicates), raise the `Euclidean Similarity Threshold` and/or lower the `Cosine Similarity Threshold`.
 
-  - ### Best Setting
+- ### Best Setting
     - Euclidean Similarity Threshold = **0.5**
     - Cosine Similarity Threshold = **0.9**
 
