@@ -81,14 +81,15 @@ After a successful run, you will see a page to select images for deletion. By de
 
 ## Credits
 
+### Raf Stahelin - Testing and Feedback
+
 ### Daxton Caylor - ComfyUI Node Developer 
-  
-  ### Contact
-   - **Twitter**: @daxcay27
-   - **Email** - daxtoncaylor@gmail.com
-   - **Discord** - daxtoncaylor
-   - **DiscordServer**: https://discord.gg/Z44Zjpurjp
-  
-  ### Support
-   - **Buy me a coffee**: https://buymeacoffee.com/daxtoncaylor
-   - **Support me on paypal**: https://paypal.me/daxtoncaylor
+  - ### Contact
+     - **Twitter**: @daxcay27
+     - **Email** - daxtoncaylor@gmail.com
+     - **Discord** - daxtoncaylor
+     - **DiscordServer**: https://discord.gg/Z44Zjpurjp
+    
+  - ### Support
+     - **Buy me a coffee**: https://buymeacoffee.com/daxtoncaylor
+     - **Support me on paypal**: https://paypal.me/daxtoncaylor
