@@ -1,5 +1,5 @@
 
-![COMFY-UI (2)](https://github.com/daxcay/ImageDuplicateFinder/assets/164315771/6b472fc0-8a2e-419a-a623-d7b94910d895)
+![COMFY-UI (4)](https://github.com/daxcay/ImageDuplicateFinder/assets/164315771/39d8151a-b234-4fd5-b65d-2291a96585ff)
 
 # ImageDuplicateFinder
 
