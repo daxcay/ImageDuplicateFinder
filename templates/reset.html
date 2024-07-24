@@ -12,10 +12,14 @@
     <script>
         $(document).ready(function () {
 
-            let images_folder = localStorage.getItem('images_folder')
-            $.post('/open_folder', { images_folder: images_folder }, function (data) {
+            function getQueryParam(param) {
+                const url = new URL(window.location.href);
+                const params = new URLSearchParams(url.search);
+                return params.get(param);
+            }
+
+            $.post(`/delete_instance?instance_id=${getQueryParam('instance_id')}`, { }, function (data) {
                 if (data.status == "success") {
-                    localStorage.removeItem('images_folder');
                     window.location.href = "/"
                 }
             })

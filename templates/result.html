@@ -9,10 +9,10 @@
 </head>
 
 <body>
-    <form id="deleteForm" action="/delete_duplicates" method="post" enctype="multipart/form-data">
+    <form id="deleteForm" method="post" enctype="multipart/form-data">
         <h4>Select duplicate images for deletion. a backup will be saved</h4>
         <div class="block">
-            <input type="hidden" id="images_folder" name="images_folder" value="{{ images_folder }}">
+            <input type="hidden" id="instance_id" name="instance_id" value="{{ instance_id }}">
             <table>
                 <thead>
                     <tr>
@@ -26,9 +26,11 @@
                         <td class="original_images">
                             <ul>
                                 <li>
-                                    <input type="checkbox" name="duplicate_images[]" value="{{ original_image }}">
-                                    <img src="{{ url_for('serve_image', filename=original_image, images_folder=images_folder) }}"
-                                        alt="Original" style="width: 100px;height: auto;">
+                                    <input data-parent="{{ original_image }}" type="checkbox" name="duplicate_images[]"
+                                        value="{{ original_image }}" checked>
+                                    <img data-id="{{ original_image }}" src=" {{ url_for('serve_image',
+                                        filename=original_image, instance_id=instance_id) }}" alt="Original"
+                                        style="width: 100px;height: auto;">
                                     <span class="resolution" data-image="{{ original_image }}"></span>
                                 </li>
                             </ul>
@@ -37,9 +39,10 @@
                             <ul class="duplicate_images">
                                 {% for duplicate_image in duplicate_images %}
                                 <li>
-                                    <input type="checkbox" name="duplicate_images[]" value="{{ duplicate_image }}"
-                                        checked>
-                                    <img src="{{ url_for('serve_image', filename=duplicate_image, images_folder=images_folder) }}"
+                                    <input data-parent="{{ duplicate_image }}" type="checkbox" name="duplicate_images[]"
+                                        value="{{ duplicate_image }}" checked>
+                                    <img data-parent="{{ original_image }}" data-id="{{ duplicate_image }}"
+                                        src="{{ url_for('serve_image', filename=duplicate_image, instance_id=instance_id) }}"
                                         alt="Duplicate" style="width: 100px;height: auto;">
                                     <span class="resolution" data-image="{{ duplicate_image }}"></span>
                                 </li>
@@ -51,90 +54,156 @@
                 </tbody>
             </table>
         </div>
-        <button id="submit_delete" type="button" onclick="deleteDuplicates()">Delete Selected</button>
+        <button id="submit_delete" type="button">Delete Selected</button>
         <p id="submit_delete_message" type="button"></p>
     </form>
     <div class="errors" style="display: none;">
 
     </div>
     <script>
-        function deleteDuplicates() {
-            var formData = new FormData(document.getElementById('deleteForm'));
-            $('#submit_delete').css('display', 'none');
-            $('#submit_delete_message').text("Please Wait...");
 
-            fetch('/delete_duplicates', {
-                method: 'POST',
-                body: formData
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === "success") {
-                        $('#submit_delete_message').text("Duplicate images deleted");
-                        setTimeout(() => {
-                            window.location.href = "/reset";
-                        }, 2000)
-                    }
+        $(document).ready(function () {
+            let instance_id = $("#instance_id").val()
+
+            function deleteDuplicates() {
+                var formData = new FormData(document.getElementById('deleteForm'));
+                $('#submit_delete').css('display', 'none');
+                $('#submit_delete_message').text("Please Wait...");
+
+                fetch(`/delete_duplicates?instance_id=${instance_id}`, {
+                    method: 'POST',
+                    body: formData
                 })
-                .catch(error => {
-                    console.error('Error:', error);
-                    $('#submit_delete').css('display', 'block');
-                });
-        }
-
-        function calculateImageDimensions() {
-            var images = document.querySelectorAll('.duplicate_images img');
-            images.forEach(function (img) {
-                if (img.complete) {
-                    displayImageDimensions(img);
-                } else {
-                    img.onload = function () {
-                        displayImageDimensions(img);
-                    };
-                }
-            });
-            images = document.querySelectorAll('.original_images img');
-            images.forEach(function (img) {
-                if (img.complete) {
-                    displayImageDimensions(img);
-                } else {
-                    img.onload = function () {
-                        displayImageDimensions(img);
-                    };
-                }
-            });
-        }
-
-        function displayImageDimensions(img) {
-            var resolutionSpan = img.parentNode.querySelector('.resolution');
-            if (resolutionSpan && img.naturalWidth && img.naturalHeight) {
-                resolutionSpan.innerText = '(' + img.naturalWidth + 'x' + img.naturalHeight + ')';
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === "success") {
+                            $('#submit_delete_message').text("Duplicate images deleted");
+                            setTimeout(() => {
+                                window.location.href = `/reset?instance_id=${instance_id}`;
+                            }, 2000)
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        $('#submit_delete').css('display', 'block');
+                    });
             }
-        }
 
-        function init() {
-            
-            calculateImageDimensions()
-            
-            fetch('/find_duplicates_errors')
-                .then(response => response.json())
-                .then(data => {
-                    let text = ""
-                    if(data.errors && data.errors.length > 0) {
-                        $('.errors').css("display","block")
-                        for (let index = 0; index < data.errors.length; index++) {
-                            let error = data.errors[index]
-                            text+=`<p>Image read error: <b>${error}</b> </p>`
-                        }                        
-                        $('.errors').append(text)
+            $("#submit_delete").on("click", deleteDuplicates)
+
+            function calculateImageDimensions() {
+                let map = {};
+                let imagePromises = [];
+
+                function loadImage(img) {
+                    return new Promise((resolve) => {
+                        if (img.complete) {
+                            resolve(img);
+                        } else {
+                            img.onload = function () {
+                                resolve(img);
+                            };
+                        }
+                    });
+                }
+
+                var images = document.querySelectorAll('.duplicate_images img, .original_images img');
+                for (let i = 0; i < images.length; i++) {
+                    let img = images[i];
+                    let parent = img.getAttribute('data-parent');
+                    let id = img.getAttribute('data-id');
+
+                    if (parent) { // This check ensures original images without parent are not added to the map
+                        if (!map[parent]) {
+                            map[parent] = [id];
+                        } else {
+                            map[parent].push(id);
+                        }
                     }
-                })
-                .catch(error => {
-                    console.log(error)
-                });
-        }
 
-        document.addEventListener('DOMContentLoaded', init);
+                    imagePromises.push(loadImage(img).then(displayImageDimensions));
+                }
+
+                Promise.all(imagePromises).then(() => {
+                    let keys = Object.keys(map);
+                    for (let i = 0; i < keys.length; i++) {
+                        let parent = keys[i];
+                        let list = map[parent];
+                        list.push(parent);
+                        uncheckForHighestAmongImages(list);
+                    }
+                });
+            }
+
+            function uncheckForHighestAmongImages(list) {
+                let resolutions = {};
+                let inarray = [];
+
+                for (let i = 0; i < list.length; i++) {
+                    let parent = list[i];
+                    let w = parseInt($(`img[data-id='${parent}']`).attr('data-w'));
+                    let h = parseInt($(`img[data-id='${parent}']`).attr('data-h'));
+                    resolutions[parent] = w * h;
+                    inarray.push(resolutions[parent]);
+                }
+
+                inarray.sort((a, b) => b - a);
+                let candidate = inarray[0]
+
+                if(candidate) {
+
+                    let imageToGetUnchecked = null
+
+                    for (let i = 0; i < list.length; i++) {
+                        let parent = list[i];
+                        if(resolutions[parent] == candidate) {
+                            imageToGetUnchecked = parent
+                            break
+                        }
+                    }
+
+                    if(imageToGetUnchecked) {
+                        $(`input[data-parent='${imageToGetUnchecked}']`).prop('checked', 0)
+                    }
+                    
+                }
+
+            }
+
+            function displayImageDimensions(img) {
+                var resolutionSpan = img.parentNode.querySelector('.resolution');
+                if (resolutionSpan && img.naturalWidth && img.naturalHeight) {
+                    img.setAttribute('data-w', img.naturalWidth);
+                    img.setAttribute('data-h', img.naturalHeight);
+                    resolutionSpan.innerText = '(' + img.naturalWidth + 'x' + img.naturalHeight + ')';
+                }
+            }
+
+
+            function init() {
+
+                calculateImageDimensions()
+
+                fetch(`/find_duplicates_errors?instance_id=${instance_id}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        let text = ""
+                        if (data.errors && data.errors.length > 0) {
+                            $('.errors').css("display", "block")
+                            for (let index = 0; index < data.errors.length; index++) {
+                                let error = data.errors[index]
+                                text += `<p>Image read error: <b>${error}</b> </p>`
+                            }
+                            $('.errors').append(text)
+                        }
+                    })
+                    .catch(error => {
+                        console.log(error)
+                    });
+            }
+
+            init()
+        })
     </script>
 </body>
 

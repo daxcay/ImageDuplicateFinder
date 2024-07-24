@@ -21,11 +21,19 @@ app = Flask(__name__)
 THREAD_COUNT = 8
 base_model = ResNet50(weights='imagenet')
 model = Model(inputs=base_model.input, outputs=base_model.get_layer('avg_pool').output)
-images_folder_progress = 0
-dupprogress = 0
-dupprogresstext = "0/0"
-errors = []
-stop_thread = False
+
+instances = {}
+
+def create_new_instance(id):
+    instances[id] = {
+        "images_folder":"",
+        "images_backup_folder":"",
+        "images_folder_progress": 0,
+        "find_duplicate_progress":0,
+        "find_duplicate_progress_text":"0/0",
+        "errors": [],
+        "stop_thread": False
+    }
 
 def copy_files(src_dir, dest_dir, delete_source=False):
     for item in os.listdir(src_dir):
@@ -93,13 +101,9 @@ def extract_features(image_path):
         print(f"Error processing image {image_path}: {e}")
         return None, None
 
-def find_duplicates(folder_path, esimilarity_threshold=0.5, csimilarity_threshold=0.9):
-    global dupprogress
-    global dupprogresstext
-    global errors
-    global stop_thread
+def find_duplicates(folder_path, instance_id, esimilarity_threshold=0.5, csimilarity_threshold=0.9):
 
-    stop_thread = False  # Reset the stop flag at the beginning
+    global instances
 
     if not os.path.exists(folder_path):
         print(f"The provided folder path {folder_path} does not exist.")
@@ -115,15 +119,16 @@ def find_duplicates(folder_path, esimilarity_threshold=0.5, csimilarity_threshol
     duplicates_dict = {}
 
     for idx, img_path in enumerate(images):
-        if stop_thread:  # Check the stop flag
+        if instances[instance_id]["stop_thread"]:
             print("Stopping thread as requested.")
+            del instances[instance_id]
             break
 
         try:
             features, img_hash = extract_features(img_path)
             if features is None:
-                dupprogress = (idx + 1) * 100 // len(images)
-                dupprogresstext = f'{(idx + 1)}/{len(images)}'
+                instances[instance_id]["find_duplicate_progress"] = (idx + 1) * 100 // len(images)
+                instances[instance_id]["find_duplicate_progress_text"] = f'{(idx + 1)}/{len(images)}'
                 continue
 
             with lock:
@@ -139,14 +144,14 @@ def find_duplicates(folder_path, esimilarity_threshold=0.5, csimilarity_threshol
                 if not is_duplicate:
                     features_list[img_path] = (features, img_hash)
 
-            dupprogress = (idx + 1) * 100 // len(images)
-            dupprogresstext = f'{(idx + 1)}/{len(images)}'
+            instances[instance_id]["find_duplicate_progress"] = (idx + 1) * 100 // len(images)
+            instances[instance_id]["find_duplicate_progress_text"] = f'{(idx + 1)}/{len(images)}'
 
         except Exception as e:
             print(f"Error processing image {img_path}")
-            errors.append(img_path)
-            dupprogress = (idx + 1) * 100 // len(images)
-            dupprogresstext = f'{(idx + 1)}/{len(images)}'
+            instances[instance_id]["errors"].append(img_path)
+            instances[instance_id]["find_duplicate_progress"] = (idx + 1) * 100 // len(images)
+            instances[instance_id]["find_duplicate_progress_text"] = f'{(idx + 1)}/{len(images)}'
 
     print(f'Finished processing {folder_path}.')
     os.makedirs(os.path.dirname(os.path.join(folder_path, 'duplicates.json')), exist_ok=True)
@@ -170,31 +175,25 @@ def load_image_data(folder_path):
 def generate_random_string(length=10):
     return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
 
-def prepare_files(images_folder, backup_folder):
-    global images_folder_progress
+def prepare_files(images_folder, backup_folder, instance_id):
 
+    global instances
     image_extensions = ['.jpg', '.jpeg', '.png']
-
     files = [f for f in os.listdir(images_folder) if os.path.isfile(os.path.join(images_folder, f)) and os.path.splitext(f)[1].lower() in image_extensions]
     total_files = len(files)
-
+    
     if total_files == 0: 
         total_backup_files = len([f for f in os.listdir(backup_folder) if os.path.isfile(os.path.join(backup_folder, f))])
         if total_backup_files == 0:
-            images_folder_progress = -1
+            instances[instance_id]['images_folder_progress'] = -1
         else:
             copy_files(backup_folder, images_folder)
-            images_folder_progress = 100
+            instances[instance_id]['images_folder_progress'] = 100
     else:    
         for idx, file in enumerate(files):
             source_path = os.path.join(images_folder, file)
-            # file_name, file_extension = os.path.splitext(file)
-            # # unique_name = f"{time.time_ns()}-{generate_random_string()}{file_extension}"
-            # shutil.copy(source_path, os.path.join(images_folder, file_name))
-            # shutil.copy(source_path, os.path.join(backup_folder, file_name))
             shutil.copy(source_path, backup_folder)
-            # os.remove(source_path)
-            images_folder_progress = (idx + 1) * 100 // total_files
+            instances[instance_id]['images_folder_progress'] = (idx + 1) * 100 // total_files
 
 # assets directory setup
 @app.route('/assets/<path:filename>')
@@ -208,13 +207,24 @@ def page_main():
 
 @app.route('/result')
 def page_result():
-    images_folder = request.args.get('images_folder')
-    image_data = load_image_data(images_folder)
-    return render_template('result.html', image_data=image_data, images_folder=images_folder)
+
+    global instances
+    instance_id = request.args.get('instance_id')
+    if instance_id not in instances:
+        return f"{instance_id} not found", 404
+
+    image_data = load_image_data(instances[instance_id]["images_folder"])
+    return render_template('result.html', image_data=image_data, instance_id=instance_id)
 
 @app.route('/images/<path:filename>')
 def serve_image(filename):
-    images_folder = request.args.get('images_folder')
+
+    global instances
+    instance_id = request.args.get('instance_id')
+    if instance_id not in instances:
+        return f"{instance_id} not found", 404
+
+    images_folder = instances[instance_id]["images_folder"]
     return send_from_directory(images_folder, filename)
 
 @app.route('/reset')
@@ -224,9 +234,13 @@ def page_reset():
 # api routes
 @app.route('/images_folder', methods=['POST'])
 def api_submit_image_folder():
-    global images_folder_progress
 
+    global instances
+    instance_id = request.args.get('instance_id')
+    
+    create_new_instance(instance_id)
     images_folder = request.form.get('images_folder')
+    instances[instance_id]["images_folder"] = images_folder
 
     if not images_folder:
         return jsonify({'status': 'error', 'error': 'No folder path provided'})
@@ -235,48 +249,63 @@ def api_submit_image_folder():
         return jsonify({'status': 'error', 'error': 'Invalid folder path'})
 
     images_backup_folder = os.path.join(images_folder, 'backup')
+    instances[instance_id]["images_backup_folder"] = images_backup_folder
 
     os.makedirs(images_backup_folder, exist_ok=True)
-    prepare_files(images_folder, images_backup_folder)
+    prepare_files(images_folder, images_backup_folder, instance_id)
+
     return jsonify({'status': 'success', 'success': 'Reading folder'})
     
 @app.route('/images_folder')
 def api_images_folder_progress():
-    global images_folder_progress
-    return jsonify({'progress': images_folder_progress})
+
+    global instances
+    instance_id = request.args.get('instance_id')
+    if instance_id not in instances:
+        return jsonify({'error': 'instance not found!'})
+    
+    return jsonify({'progress': instances[instance_id]["images_folder_progress"]})
 
 @app.route('/find_duplicates', methods=['POST'])
 def finddup():
-    global dupprogress
-    global dupprogresstext
-    global errors
-    errors = []
-    dupprogresstext = "0/0"
-    dupprogress = 0
-    images_folder = request.form['images_folder']
+
+    global instances
+    instance_id = request.args.get('instance_id')
+    if instance_id not in instances:
+        return jsonify({'error': 'instance not found!'})
+
+    images_folder = instances[instance_id]["images_folder"]
     esimilarity_threshold = float(request.form.get('esimilarity_threshold', 0.5))
     csimilarity_threshold = float(request.form.get('csimilarity_threshold', 0.9))
     data_path = os.path.join(images_folder, 'duplicates.json')
     if os.path.exists(data_path):
         os.remove(data_path)
-    thread = Thread(target=find_duplicates, args=(images_folder, esimilarity_threshold, csimilarity_threshold))
+    thread = Thread(target=find_duplicates, args=(images_folder, instance_id, esimilarity_threshold, csimilarity_threshold))
     thread.start()
     return jsonify({'status': 'success'})
 
 @app.route('/find_duplicates')
 def get_dup_progress():
-    global dupprogress
-    global dupprogresstext
-    return jsonify({'progress': dupprogress, 'text': dupprogresstext})
+    global instances
+    instance_id = request.args.get('instance_id')
+    if instance_id not in instances:
+        return jsonify({'error': 'instance not found!'})
+    
+    return jsonify({'progress': instances[instance_id]["find_duplicate_progress"], 'text': instances[instance_id]["find_duplicate_progress_text"]})
 
 @app.route('/find_duplicates_errors')
 def get_dup_progress_errors():
-    global errors
-    return jsonify({'errors': errors})
+    global instances
+    instance_id = request.args.get('instance_id')
+    if instance_id not in instances:
+        return jsonify({'error': 'instance not found!'})
+
+    return jsonify({'errors': instances[instance_id]["errors"]})
 
 @app.route('/delete_duplicates', methods=['POST'])
 def delete_duplicates():
-    images_folder = request.form['images_folder']
+    instance_id = request.form.get('instance_id')
+    images_folder = instances[instance_id]["images_folder"]
     duplicate_images = request.form.getlist('duplicate_images[]')
     for image in duplicate_images:
         image_path = os.path.join(images_folder, image)
@@ -289,16 +318,24 @@ def delete_duplicates():
 
 @app.route('/stop_duplicates', methods=['POST'])
 def stop_duplicates():
-    global stop_thread
-    stop_thread = True
+    global instances
+    instance_id = request.args.get('instance_id')
+    if instance_id not in instances:
+        return jsonify({'error': 'instance not found!'})
+    instances[instance_id]["stop_thread"] = True
     return jsonify({'status': 'success', 'message': 'Stopping duplicate finding process'})
 
-@app.route('/open_folder', methods=['POST'])
-def open_folder():
+@app.route('/delete_instance', methods=['POST'])
+def delete_instance():
+    global instances
+    instance_id = request.args.get('instance_id')
+    if instance_id not in instances:
+        return jsonify({'error': 'instance not found!'})
+    del instances[instance_id]
     return jsonify({'status': "success"})
 
 def start_flask():
-    app.run(debug=False, port=5501)
+    app.run(debug=True, port=5501)
 
 if __name__ == '__main__':
     webbrowser.open('http://127.0.0.1:5501')

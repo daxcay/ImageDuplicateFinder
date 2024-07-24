@@ -1,14 +1,10 @@
 $(document).ready(function () {
 
     let progress_bar = null;
+    let instance_id = Date.now()
 
     $('#images_folder_modal_stop').css('display', 'none')
     $('#images_folder_modal_stop').on('click', stopAndReload)
-
-    let images_folder = localStorage.getItem('images_folder');
-    if(images_folder) {
-        $('#images_folder').val(images_folder);
-    }
 
     $('#images_folder').on('change', function () {
         var value = $('#images_folder').val();
@@ -30,9 +26,6 @@ $(document).ready(function () {
 
         e.preventDefault();
         var images_folder = $('#images_folder').val();
-        var esimilarity_threshold = $('#esimilarity_threshold').val();
-        var csimilarity_threshold = $('#csimilarity_threshold').val();
-
         $('#images_folder_modal_submit').css('display', 'none');
 
         if (!progress_bar)
@@ -41,12 +34,9 @@ $(document).ready(function () {
         progress_bar.setProgress(0);
         progress_bar.setText("Preparing(" + 0 + "%)");
 
-        $.post('/images_folder', { images_folder: images_folder })
+        $.post(`/images_folder?instance_id=${instance_id}`, { images_folder: images_folder })
             .done(function (data) {
                 if (data.status == "success") {
-                    localStorage.setItem('images_folder', images_folder);
-                    localStorage.setItem('esimilarity_threshold', esimilarity_threshold);
-                    localStorage.setItem('csimilarity_threshold', csimilarity_threshold);
                     checkFolderProgress();
                 } else {
                     console.error("Unexpected response:", data);
@@ -64,7 +54,7 @@ $(document).ready(function () {
         if (!progress_bar)
             progress_bar = new ProgressBar('#images_folder_modal');
         var interval = setInterval(function () {
-            $.get('/images_folder', function (data) {
+            $.get(`/images_folder?instance_id=${instance_id}`, function (data) {
                 if (data.progress == 100) {
                     clearInterval(interval);
                     findDuplicates();
@@ -76,13 +66,14 @@ $(document).ready(function () {
     }
 
     function findDuplicates() {
-        let images_folder = localStorage.getItem('images_folder');
-        let esimilarity_threshold = localStorage.getItem('esimilarity_threshold');
-        let csimilarity_threshold = localStorage.getItem('csimilarity_threshold');
+
+        var images_folder = $('#images_folder').val();
+        var esimilarity_threshold = $('#esimilarity_threshold').val();
+        var csimilarity_threshold = $('#csimilarity_threshold').val();
 
         $('#images_folder_modal_stop').css('display', 'initial')
 
-        $.post('/find_duplicates', {
+        $.post(`/find_duplicates?instance_id=${instance_id}`, {
             images_folder: images_folder,
             esimilarity_threshold: esimilarity_threshold,
             csimilarity_threshold: csimilarity_threshold
@@ -94,7 +85,7 @@ $(document).ready(function () {
     }
 
     function stopAndReload() {
-        $.post('/stop_duplicates', {}, function (data) {
+        $.post(`/stop_duplicates?instance_id=${instance_id}`, {}, function (data) {
             if (data.status == "success") {
                 window.location.reload()
             }
@@ -105,11 +96,10 @@ $(document).ready(function () {
         if (!progress_bar)
             progress_bar = new ProgressBar('#images_folder_modal');
         var interval = setInterval(function () {
-            $.get('/find_duplicates', function (data) {
+            $.get(`/find_duplicates?instance_id=${instance_id}`, function (data) {
                 if (data.progress == 100) {
                     clearInterval(interval);
-                    let images_folder = localStorage.getItem('images_folder');
-                    window.location.href = "/result?images_folder=" + images_folder;
+                    window.location.href = `/result?instance_id=${instance_id}`;
                 }
                 progress_bar.setProgress(data.progress);
                 progress_bar.setText("Finding duplicates(" + data.text + ")");
