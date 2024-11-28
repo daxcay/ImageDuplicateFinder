@@ -79,7 +79,7 @@ After a successful run, you will see a page to select images for deletion. By de
      - **Twitter**: @daxcay27
      - **Email** - daxtoncaylor@gmail.com
      - **Discord** - daxtoncaylor
-     - **DiscordServer**: https://discord.gg/Z44Zjpurjp
+     - **DiscordServer**: https://discord.gg/UyGkJycvyW
     
   - ### Support
      - **Buy me a coffee**: https://buymeacoffee.com/daxtoncaylor
